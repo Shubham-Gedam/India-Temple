@@ -5,13 +5,14 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Check if an admin or user is currently logged in (by checking localStorage tokens)
-  const isAdminLoggedIn = !!localStorage.getItem('token'); 
-  const isUserLoggedIn = !!localStorage.getItem('userToken'); 
+const userRole = localStorage.getItem('userRole');
+const isAdminLoggedIn = userRole === 'admin';
+const isUserLoggedIn = userRole === 'user';
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userToken');
+    localStorage.removeItem('userRole');
     navigate('/');
   };
 

@@ -1,65 +1,81 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import API from '../apis/axios';
+import { AUTH_API as API } from '../apis/axios';
 
 export default function Login() {
   const navigate = useNavigate();
 
-  // 1. Core Form & UI States
-  const [isRegister, setIsRegister] = useState(false); // Toggles between Login mode and Register mode
-  const [isAdminMode, setIsAdminMode] = useState(false); // Toggles between Regular User and Admin Portal
+  // 1. UI states toggle (Login vs Register)
+  const [isRegister, setIsRegister] = useState(false);
   
-  const [name, setName] = useState(''); // Only used for user registration
+  // Registration and login state management parameters
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 2. Clear messages when switching states
-  const handleModeSwitch = (toAdmin) => {
-    setIsAdminMode(toAdmin);
+  // 2. Clear state on tab toggles
+  const handleToggleMode = (registerState) => {
+    setIsRegister(registerState);
     setError('');
     setSuccess('');
-    // Admins don't register, force login view if admin mode is picked
-    if (toAdmin) setIsRegister(false); 
   };
 
-  // 3. Form Submission Handler
+  // 3. Form Submission Event Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true);
+    setLoading(false);
 
     try {
-      if (isAdminMode) {
-        // --- ADMIN LOGIN ---
-        const response = await API.post('/auth/admin-login', { email, password });
-        if (response.data?.token) {
-          localStorage.setItem('token', response.data.token);
-          navigate('/admin'); // Redirect straight to CRUD dashboard
-        }
+      if (isRegister) {
+        // --- REGISTER USER FLOW ---
+        // Match backend nested payload format: { username, email, password, fullname: { firstname, lastname } }
+        const payload = {
+          username,
+          email,
+          password,
+          fullname: {
+            firstname,
+            lastname
+          }
+        };
+
+        await API.post('/register', payload);
+        setSuccess('Registration successful! Please switch over to Sign In.');
+        setIsRegister(false);
+        // Clear inputs
+        setFirstname('');
+        setLastname('');
       } else {
-        if (isRegister) {
-          // --- USER REGISTRATION ---
-          await API.post('/auth/user-register', { name, email, password });
-          setSuccess('Account created cleanly! You can now switch to Sign In.');
-          setIsRegister(false);
-          setName('');
-        } else {
-          // --- USER LOGIN ---
-          const response = await API.post('/auth/user-login', { email, password });
-          if (response.data?.userToken) {
-            localStorage.setItem('userToken', response.data.userToken);
-            navigate('/'); // Redirect back to Home portal
+        // --- COMMON LOGIN FLOW (User & Admin) ---
+        // Backend handles identification seamlessly through common route checks
+        const response = await API.post('/login', { email, password });
+        
+        const userData = response.data?.user;
+        
+        if (userData) {
+          // Local storage configurations for view level routing
+          localStorage.setItem('userRole', userData.role);
+          localStorage.setItem('userName', userData.username);
+
+          // Route switching depending upon role status variables
+          if (userData.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
           }
         }
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || 'Authentication failed. Please verify entry lines.');
+      setError(err.response?.data?.message || 'Authentication layers failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
@@ -69,62 +85,87 @@ export default function Login() {
     <div className="min-h-[85vh] flex items-center justify-center px-4 bg-slate-50 py-10">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
         
-        {/* Top Role Selector Tabs */}
+        {/* Toggle Controls Headder Tabs */}
         <div className="flex border-b border-slate-100 bg-slate-50">
           <button
             type="button"
-            onClick={() => handleModeSwitch(false)}
+            onClick={() => handleToggleMode(false)}
             className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
-              !isAdminMode ? 'bg-white text-orange-600 border-b-2 border-orange-600' : 'text-slate-400 hover:text-slate-600'
+              !isRegister ? 'bg-white text-orange-600 border-b-2 border-orange-600' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            👤 Pilgrim / User
+            Sign In 🔑
           </button>
           <button
             type="button"
-            onClick={() => handleModeSwitch(true)}
+            onClick={() => handleToggleMode(true)}
             className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${
-              isAdminMode ? 'bg-white text-amber-700 border-b-2 border-amber-700' : 'text-slate-400 hover:text-slate-600'
+              isRegister ? 'bg-white text-orange-600 border-b-2 border-orange-600' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            🔑 Admin Portal
+            Register 👤
           </button>
         </div>
 
-        {/* Card Body Elements */}
         <div className="p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
-              {isAdminMode ? 'Admin Console Sign In' : isRegister ? 'Create Pilgrim Account' : 'Pilgrim Sign In'}
+              {isRegister ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p className="text-slate-400 text-xs mt-1">
-              {isAdminMode 
-                ? 'System administrator secure gateway credentials.' 
-                : 'Access curated trail collections, save favorite nodes, and log plans.'}
+              {isRegister ? 'Sign up to explore historical archives.' : 'Sign in to access your dashboard settings.'}
             </p>
           </div>
 
-          {/* Status Message Banners */}
+          {/* Conditional Error Alerts */}
           {error && <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-lg border border-red-200">⚠️ {error}</div>}
           {success && <div className="mb-4 p-3 bg-green-50 text-green-700 text-xs rounded-lg border border-green-200">✅ {success}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Conditional Input Field: Name (Only shown during User Registration) */}
-            {!isAdminMode && isRegister && (
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Your Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Rajesh Kumar"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
-                />
-              </div>
+            
+            {/* Show extra fields ONLY when registering */}
+            {isRegister && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={firstname}
+                      onChange={(e) => setFirstname(e.target.value)}
+                      placeholder="Rajesh"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={lastname}
+                      onChange={(e) => setLastname(e.target.value)}
+                      placeholder="Kumar"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Unique Username</label>
+                  <input
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="rajesh_kumar"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+              </>
             )}
 
-            {/* Email Input Field */}
+            {/* Common Inputs */}
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Email Address</label>
               <input
@@ -133,11 +174,10 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500"
               />
             </div>
 
-            {/* Password Input Field */}
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Password</label>
               <input
@@ -146,44 +186,21 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:border-orange-500"
               />
             </div>
 
-            {/* Action Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className={`w-full text-white font-bold py-2.5 rounded-lg text-sm transition-colors shadow-sm mt-2 ${
-                isAdminMode ? 'bg-amber-700 hover:bg-amber-800' : 'bg-orange-600 hover:bg-orange-700'
-              } disabled:bg-slate-300`}
+              className="w-full text-white bg-orange-600 hover:bg-orange-700 font-bold py-2.5 rounded-lg text-sm transition-colors shadow-sm disabled:bg-slate-300 mt-2"
             >
-              {loading ? 'Processing Transaction Layers...' : isAdminMode ? 'Sign In Admin Instance' : isRegister ? 'Register Account' : 'Sign In'}
+              {loading ? 'Processing Backend Handshakes...' : isRegister ? 'Register Account' : 'Sign In To Account'}
             </button>
+
           </form>
-
-          {/* Bottom Context Switch Toggle Link (Hidden for Admin Mode) */}
-          {!isAdminMode && (
-            <div className="mt-6 text-center text-xs text-slate-500">
-              {isRegister ? (
-                <p>
-                  Already registered?{' '}
-                  <button type="button" onClick={() => setIsRegister(false)} className="text-orange-600 font-bold hover:underline">
-                    Sign In Here
-                  </button>
-                </p>
-              ) : (
-                <p>
-                  New pilgrim explorer?{' '}
-                  <button type="button" onClick={() => setIsRegister(true)} className="text-orange-600 font-bold hover:underline">
-                    Create an Account
-                  </button>
-                </p>
-              )}
-            </div>
-          )}
-
         </div>
+
       </div>
     </div>
   );

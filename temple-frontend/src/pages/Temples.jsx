@@ -1,127 +1,114 @@
 import { useState, useEffect } from 'react';
 import SearchBar from '../components/searchBar';
 import TempleCard from '../components/TempleCart';
-import API from '../apis/axios';
+import { TEMPLE_API as API } from '../apis/axios';
 
 export default function Temples() {
-  // 1. Set up state to store temples data from backend, loading status, and filter metrics
   const [temples, setTemples] = useState([]);
-  const [filteredTemples, setFilteredTemples] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 2. Fetch all temples from your backend API database on initial mount
+  // Initial render lifecycle check
   useEffect(() => {
-    const fetchTemplesData = async () => {
-      try {
-        setLoading(true);
-        // Replace '/temples' with your exact backend GET endpoint path if different
-        const response = await API.get('/temples');
-        
-        // Handle cases where response might be an object wrapping the array
-        const data = Array.isArray(response.data) ? response.data : response.data.temples || [];
-        setTemples(data);
-        setFilteredTemples(data); // Set initial display to show everything
-      } catch (err) {
-        console.error('Error fetching temple listings:', err);
-        setError('Failed to fetch temple data from server. Please check connection.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTemplesData();
+    fetchInitialTemples();
   }, []);
 
-  // 3. This runs automatically whenever someone interacts with your SearchBar component
-  const handleSearchFilter = ({ query, state, deity }) => {
-    let outputList = [...temples];
-
-    // Filter by search bar text input matches (Temple Name)
-    if (query.trim() !== '') {
-      outputList = outputList.filter((t) =>
-        t.name.toLowerCase().includes(query.toLowerCase())
-      );
+  const fetchInitialTemples = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await API.get('/');
+      setTemples(response.data?.temples || []);
+    } catch (err) {
+      console.error(err);
+      setError('Database connectivity layer failed. Please refresh portal logs.');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Filter by State option selection matches
-    if (state !== '') {
-      outputList = outputList.filter((t) => t.location.toLowerCase().includes(state.toLowerCase()));
+  // Triggers automatically upon SearchBar submit click
+  const handleSearchExecution = async ({ query, state, deity }) => {
+    try {
+      setLoading(true);
+      setError('');
+
+      // Scenario A: Agar user text dalta hai toh direct `/search?q=` chalega
+      if (query.trim() !== '') {
+        const response = await API.get(`/temples/search?q=${encodeURIComponent(query)}`);
+        let filtered = response.data?.temples || [];
+        
+        // Filter dropdown parameters client side over the text results if present
+        if (state) filtered = filtered.filter(t => t.location?.state === state);
+        if (deity) filtered = filtered.filter(t => t.deity === deity);
+        
+        setTemples(filtered);
+      } else {
+        // Scenario B: Agar plain filters hain toh backend native query trigger params inject karega
+        let urlPath = '/temples?';
+        if (state) urlPath += `state=${encodeURIComponent(state)}&`;
+        if (deity) urlPath += `deity=${encodeURIComponent(deity)}&`;
+        
+        const response = await API.get(urlPath);
+        setTemples(response.data?.temples || []);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch filtered indices.');
+    } finally {
+      setLoading(false);
     }
-
-    // Filter by Deity choice dropdown matches
-    if (deity !== '') {
-      outputList = outputList.filter((t) => t.deity.toLowerCase() === deity.toLowerCase());
-    }
-
-    setFilteredTemples(outputList);
   };
 
   return (
     <div className="bg-slate-50 min-h-screen pb-16">
-      
-      {/* Dynamic Filter Section Banner */}
-      <div className="bg-gradient-to-r from-orange-700 to-amber-600 text-white py-12 px-4 text-center">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Explore Sacred Temples of India
-        </h1>
+      <div className="bg-linear-to-r from-orange-700 to-amber-600 text-white py-12 px-4 text-center">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Explore Sacred Temples</h1>
         <p className="mt-2 text-sm text-orange-100 max-w-xl mx-auto">
-          Filter through regional states and primary deities to discover architectural profiles, daily pooja schedules, and guidelines.
+          Filter through regional states and primary deities to discover authentic architectural profiles.
         </p>
       </div>
 
-      {/* Floating Interactive Search Controls Area */}
       <div className="-mt-8 px-4 mb-10">
-        <SearchBar onSearchSubmit={handleSearchFilter} />
+        <SearchBar onSearchSubmit={handleSearchExecution} />
       </div>
 
-      {/* Main Content Listings Display Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Loading Spinner Handler */}
         {loading && (
           <div className="text-center py-16">
             <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="text-slate-500 text-sm">Fetching pilgrimage records from database...</p>
+            <p className="text-slate-500 text-sm">Searching pilgrimage records...</p>
           </div>
         )}
 
-        {/* Error Callout Display Handler */}
         {error && !loading && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center max-w-xl mx-auto">
-            <span>⚠️</span> <p className="mt-1 font-medium">{error}</p>
+            <p>{error}</p>
           </div>
         )}
 
-        {/* Loaded Content and Fallback Handler */}
         {!loading && !error && (
           <>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-slate-800 uppercase tracking-wide">
-                All Available Matches ({filteredTemples.length})
-              </h2>
-            </div>
+            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-6">
+              Search Results ({temples.length})
+            </h2>
 
-            {filteredTemples.length === 0 ? (
-              // Empty search result boundary display state
+            {temples.length === 0 ? (
               <div className="bg-white border rounded-xl py-16 text-center text-slate-400 max-w-md mx-auto shadow-sm">
                 <span className="text-4xl">🛕</span>
-                <h3 className="font-bold text-slate-700 text-lg mt-3">No Temples Found</h3>
-                <p className="text-sm px-6 mt-1 text-slate-400">
-                  Try widening your text search string boundaries or clearing selected dropdown menu items.
-                </p>
+                <h3 className="font-bold text-slate-700 text-lg mt-3">No Temples Registered</h3>
+                <p className="text-xs px-6 mt-1 text-slate-400">Try widening your search terms parameters.</p>
               </div>
             ) : (
-              // Rendering Active Filtered Cards
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTemples.map((temple) => (
+                {temples.map((temple) => (
                   <TempleCard
-                    key={temple._id || temple.id} // Supports both standard database formats
-                    id={temple._id || temple.id}
+                    key={temple._id}
+                    slug={temple.slug}
                     name={temple.name}
                     location={temple.location}
                     deity={temple.deity}
-                    image={temple.image}
+                    images={temple.images}
                   />
                 ))}
               </div>
@@ -129,7 +116,6 @@ export default function Temples() {
           </>
         )}
       </div>
-
     </div>
   );
 }

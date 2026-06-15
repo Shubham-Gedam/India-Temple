@@ -16,14 +16,3 @@ router.get('/me',authMiddleware.authMiddleware,authController.getCurrentUser);
 router.get('/logout', authController.logoutController);
 
 export default router;
-/*
-{
-    "username":"test",
-    "email": "test@test.com",
-    "password": "test12",
-    "fullname": {
-        "firstname": "test",
-        "lastname": "last"
-    },
-    "role": "user"
-} */
