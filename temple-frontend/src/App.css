@@ -1,0 +1,7 @@
+
+/* Optional clean baseline adjustments */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f8fafc; /* Tailwind's slate-50 */
+}
