@@ -31,29 +31,3 @@ Backend:
 Database:
 * MongoDB Atlas (Cloud NoSQL database storage registry)
 
-📁 System Architecture & Directory Layout
-
-Frontend Layout (`/frontend`)
-`src/
-├── apis/
-│   └── axios.js          # Custom Axios network instance setup
-├── components/
-│   ├── searchBar.jsx     # Complex filter component trigger layout
-│   └── TempleCard.jsx    # Universal product item responsive profile preview card
-└── pages/
-    ├── Home.jsx          # Hero display featuring top rated temple records
-    ├── Temples.jsx       # Consolidated database search dashboard matching route
-    └── TempleDetails.jsx # Tab-swapping product specification sheet page
-    `
-
-Backend Structure (`/backend`)
-
-`src/
-├── controllers/
-│   └── temple.controller.js # Search engines, unique slug fetches, and POST actions
-├── models/
-│   └── temple.model.js      # Strict multi-layered Mongoose database schema validation
-├── routes/
-│   └── temple.routes.js     # Sequential path mappings (Static route priority over Dynamic)
-└── server.js                # Core app listener config
-`
