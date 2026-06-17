@@ -127,7 +127,6 @@ export async function getCurrentUser(req,res) {
 }
 
 export async function logoutController(req,res) {
-    const token = req.cookies.token
 
     res.clearCookie("token",{
         httpOnly: true,

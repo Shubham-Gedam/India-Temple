@@ -1,5 +1,6 @@
 import Temple from "../model/temple.model.js";
 import { createTempleValidation, updateTempleValidation, validate } from "../validations/temple.validation.js";
+import mongoose from "mongoose";
 
 export const createTemple = [
     ...createTempleValidation,   // Validation rules
@@ -56,16 +57,21 @@ export const getTempleBySlug = async (req, res, next) => {
         if (!slug) {
             return res.status(400).json({
                 success: false,
-                message: "Slug is required"
+                message: "Slug or Identity ID parameter is required"
             });
         }
 
-        const temple = await Temple.findOne({ slug: slug });
-
+        let temple = null;
+        if (mongoose.Types.ObjectId.isValid(slug)) {
+            temple = await Temple.findById(slug);
+        }
+        if (!temple) {
+            temple = await Temple.findOne({ slug: slug });
+        }
         if (!temple) {
             return res.status(404).json({
                 success: false,
-                message: `Temple with slug '${slug}' not found`
+                message: `Temple profile with token/slug '${slug}' not found inside database registries.`
             });
         }
 
@@ -74,7 +80,7 @@ export const getTempleBySlug = async (req, res, next) => {
             temple
         });
     } catch (error) {
-        console.error("Error in getTempleBySlug:", error); // Debugging ke liye
+        console.error("Error in getTempleBySlug:", error);
         next(error);
     }
 };
