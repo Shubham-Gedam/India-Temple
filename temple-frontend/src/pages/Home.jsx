@@ -1,35 +1,34 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TempleCard from '../components/TempleCart';
 import SearchBar from '../components/searchBar';
+import { TEMPLE_API as API } from "../apis/axios"; // App ka Axios instance
 
 export default function Home() {
-  // Simulated database data matching your core backend requirements
-  const sampleTemples = [
-    {
-      id: "1",
-      name: "Kedarnath Temple",
-      location: "Rudraprayag, Uttarakhand",
-      deity: "Shiva",
-      image: "https://images.unsplash.com/photo-1626621427131-69795d28b122?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "2",
-      name: "Meenakshi Amman Temple",
-      location: "Madurai, Tamil Nadu",
-      deity: "Parvati / Meenakshi",
-      image: "https://images.unsplash.com/photo-1581430872221-d10103763f0d?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "3",
-      name: "Konark Sun Temple",
-      location: "Puri, Odisha",
-      deity: "Surya",
-      image: "https://images.unsplash.com/photo-1601999109332-542b18dbec57?auto=format&fit=crop&w=600&q=80"
-    }
-  ];
+  const [featuredTemples, setFeaturedTemples] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchHomeTemples = async () => {
+      try {
+        setLoading(true);
+        const response = await API.get('/'); // Aapka backend GET all route
+        const data = response.data?.temples || response.data || [];
+        setFeaturedTemples(data.slice(0, 3)); 
+      } catch (err) {
+        console.error("Error fetching live database records for home:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeTemples();
+  }, []);
 
   const handleSearch = (searchData) => {
     console.log("User searched for:", searchData);
-    // Later, you will map this function to trigger your Axios backend api call!
+    navigate('/temples');
   };
 
   return (
@@ -55,19 +54,39 @@ export default function Home() {
           Featured Pilgrimage Sites
         </h2>
         
-        {/* Responsive Grid Setup */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sampleTemples.map((temple) => (
-            <TempleCard 
-              key={temple.id}
-              id={temple.id}
-              name={temple.name}
-              location={temple.location}
-              deity={temple.deity}
-              image={temple.image}
-            />
-          ))}
-        </div>
+        {/* Loading State Handler */}
+        {loading ? (
+          <div className="text-center py-12 text-slate-400 text-sm animate-pulse">
+            Synchronizing dynamic cultural data...
+          </div>
+        ) : featuredTemples.length === 0 ? (
+          <div className="text-center py-12 text-slate-400 text-sm border border-dashed rounded-xl bg-white">
+            No temples available in the database ledger. Open Admin Panel to inject logs.
+          </div>
+        ) : (
+          /* Responsive Grid Setup using Real Live Database Data */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredTemples.map((temple) => {
+              // Location mapping validation format safely extracted from schema array/object structures
+              const city = temple.location?.city || temple.city || "Unknown City";
+              const state = temple.location?.state || temple.state || "Unknown State";
+              
+              // Image safe fallback configuration
+              const displayImage = temple.images?.[0]?.url || temple.image || "https://images.unsplash.com/photo-1600100397608-f010e42fa02e";
+
+              return (
+                <TempleCard 
+                  key={temple._id || temple.id}
+                  id={temple._id || temple.id} 
+                  name={temple.name}
+                  location={`${city}, ${state}`}
+                  deity={temple.deity}
+                  image={displayImage}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

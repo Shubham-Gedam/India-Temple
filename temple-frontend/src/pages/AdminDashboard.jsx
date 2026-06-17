@@ -70,12 +70,15 @@ export default function AdminDashboard() {
     setError("");
     setSuccessMsg("");
 
-    // Location parsing mechanism
+    // Location parsing mechanism safely handling commas
     const locationParts = location.split(",");
     const cityClean = locationParts[0] ? locationParts[0].trim() : "";
     const stateClean = locationParts[1] ? locationParts[1].trim() : "";
 
-    // 🌟 EXACT BLUEPRINT ALIGNED SCHEMATIC PAYLOAD OBJECT
+    // 🌟 Handle Image Safe Fallback Rule
+    const finalImageUrl = image.trim() || "https://images.unsplash.com/photo-1600100397608-f010e42fa02e";
+
+    // EXACT BLUEPRINT ALIGNED SCHEMATIC PAYLOAD OBJECT
     const payload = {
       name: name.trim(),
       location: {
@@ -84,15 +87,22 @@ export default function AdminDashboard() {
         address: location.trim(),
         coordinates: {
           type: "Point",
-          coordinates: [77.2090, 28.6139] // Default safe [longitude, latitude] array mappings
+          coordinates: [77.2090, 28.6139]
         }
       },
-      deity: deity, // Maps directly with schema strict values criteria
-      historicalBackground: history.trim(), // Strict Required context
+      deity: deity,
+      historicalBackground: history.trim(),
       significance: "Significant socio-cultural spiritual locus marker.",
       architecture: "Traditional authentic Indian architectural structure.",
       
-      // Strict Array of Objects conversions for nested objects mapping
+      // ✅ Images field properly mapped into array of object structure for BOTH Create & Update
+      images: [
+        {
+          url: finalImageUrl,
+          caption: `${name.trim()} Structural Profile View`
+        }
+      ],
+      
       darshanTimings: [
         {
           day: "All Days",
@@ -119,13 +129,6 @@ export default function AdminDashboard() {
         photographyAllowed: false,
         entryFee: "Free Public Walk-in"
       },
-
-      images: [
-        {
-          url: image.trim() || "https://images.unsplash.com/photo-1602643163983-ed0babc39797",
-          caption: `${name.trim()} Front Profile View`
-        }
-      ],
       
       isVerified: true,
       featured: false,
@@ -147,7 +150,7 @@ export default function AdminDashboard() {
     try {
       if (editingId) {
         await API.put(`/${editingId}`, payload);
-        setSuccessMsg("Temple information updated cleanly!");
+        setSuccessMsg("Temple information updated cleanly with images!");
       } else {
         await API.post("/", payload);
         setSuccessMsg("New heritage temple cataloged successfully!");
@@ -164,11 +167,12 @@ export default function AdminDashboard() {
     }
   };
 
-  // 6. Setup Edit Mode triggers
+  // 6. Setup Edit Mode triggers (Fixed image mapping logic)
   const handleEditTrigger = (temple) => {
     setEditingId(temple._id || temple.id);
     setName(temple.name || "");
 
+    // Safely mapping city and state components back into text input
     if (temple.location && typeof temple.location === 'object') {
       const city = temple.location.city || "";
       const state = temple.location.state || "";
@@ -179,8 +183,15 @@ export default function AdminDashboard() {
 
     setDeity(temple.deity || "");
     
-    // Safely mapping database array components back into linear frontend strings
-    setImage(Array.isArray(temple.images) ? temple.images[0]?.url || "" : "");
+    // ✅ FIX: Extract image string perfectly from direct image prop OR nested images array
+    if (temple.image && typeof temple.image === 'string') {
+      setImage(temple.image);
+    } else if (Array.isArray(temple.images) && temple.images.length > 0) {
+      setImage(temple.images[0]?.url || "");
+    } else {
+      setImage("");
+    }
+
     setHistory(temple.historicalBackground || "");
     setDarshanTimings(Array.isArray(temple.darshanTimings) ? temple.darshanTimings[0]?.morningOpen || "" : "");
     setFestivals(Array.isArray(temple.festivals) ? temple.festivals[0]?.name || "" : "");
@@ -210,7 +221,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-slate-50 min-h-screen">
-      {/* Dashboard Top Header Control Panel */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
@@ -228,7 +239,7 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* Global Status Callout Messages */}
+      {/* Global Status Messages */}
       {error && (
         <div className="mb-6 p-3 bg-red-50 text-red-700 text-sm border border-red-200 rounded-lg">
           ⚠️ {error}
