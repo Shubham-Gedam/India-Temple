@@ -7,9 +7,23 @@ export default function Temples() {
   const [temples, setTemples] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedTradition, setSelectedTradition] = useState('All');
-  const traditions = ['All', 'Chola', 'Vaishnava', 'Shaiva', 'Jain', 'Buddhist'];
-  const popularTags = ['Shiva', 'Vishnu', 'Shakti', 'Tamil Nadu', 'Rajasthan', 'Kerala'];
+  
+  // State management for individual filter layers
+  const [selectedState, setSelectedState] = useState('All States');
+  const [selectedDeity, setSelectedDeity] = useState('All Deities');
+  const [selectedArch, setSelectedArch] = useState('All Types');
+
+  // Hardcoded Sidebar Lists matching DevaBhoomi mockup
+  const statesList = ['All States', 'Tamil Nadu', 'Andhra Pradesh', 'Karnataka', 'Kerala', 'Maharashtra', 'Rajasthan', 'Uttar Pradesh', 'Odisha'];
+  const deitiesList = ['All Deities', 'Lord Shiva', 'Lord Vishnu', 'Goddess Devi', 'Lord Ganesha', 'Lord Murugan', 'Lord Brahma'];
+  const archStyles = [
+    { name: 'All Types', count: 4200 },
+    { name: 'Dravidian', count: 1340 },
+    { name: 'Nagara', count: 1850 },
+    { name: 'Vesara', count: 650 },
+    { name: 'Cave Temple', count: 210 },
+    { name: 'Hilltop Shrine', count: 150 },
+  ];
 
   useEffect(() => {
     fetchInitialTemples();
@@ -33,19 +47,16 @@ export default function Temples() {
     try {
       setLoading(true);
       setError('');
+      let urlPath = '/?';
       if (query && query.trim() !== '') {
         const response = await API.get(`/search?q=${encodeURIComponent(query)}`);
         let filtered = response.data?.temples || [];
-
         if (state) filtered = filtered.filter(t => t.location?.state === state);
         if (deity) filtered = filtered.filter(t => t.deity === deity);
-        
         setTemples(filtered);
       } else {
-        let urlPath = '/?';
         if (state) urlPath += `state=${encodeURIComponent(state)}&`;
         if (deity) urlPath += `deity=${encodeURIComponent(deity)}&`;
-        
         const response = await API.get(urlPath);
         setTemples(response.data?.temples || []);
       }
@@ -57,122 +68,171 @@ export default function Temples() {
     }
   };
 
+  const resetAllFilters = () => {
+    setSelectedState('All States');
+    setSelectedDeity('All Deities');
+    setSelectedArch('All Types');
+    fetchInitialTemples();
+  };
+
   return (
-    <div className="bg-[#FAF6F0] min-h-screen pb-24 font-sans antialiased">
+    <div className="bg-[#FAF6F0] min-h-screen pb-24 font-sans antialiased text-[#2B1404]">
       
-      {/* 1. Hero / Header Section with Subtle Image Layer Overlay */}
+      {/* 1. Header Overlay Hero Section */}
       <div 
-        className="relative bg-cover bg-center text-white pt-24 pb-20 px-4 text-center shadow-inner"
+        className="relative bg-cover bg-center text-white pt-25 pb-24 px-4 text-center"
         style={{ 
-          backgroundImage: `linear-gradient(to bottom, rgba(120, 53, 4, 0.85), rgba(43, 20, 4, 0.92)), url('https://images.unsplash.com/photo-1621869606578-1561708a7e09?q=80&w=1107&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')` 
+          backgroundImage: `linear-gradient(to bottom, rgba(43, 20, 4, 0.75), rgba(43, 20, 4, 0.85)), url('https://images.unsplash.com/photo-1621869606578-1561708a7e09?q=80&w=1107&auto=format&fit=crop')` 
         }}
       >
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-semibold tracking-wide drop-shadow-sm">
+          {/* <span className="text-[10px] uppercase tracking-widest text-amber-400 font-bold block mb-2">DEVABHOOMI ARCHIVE</span> */}
+          <h1 className="text-7xl md:text-5xl font-serif font-normal tracking-wide">
             Explore Sacred Temples
           </h1>
-          <p className="mt-4 text-xs md:text-sm text-orange-200/90 max-w-xl mx-auto tracking-wide font-light">
-            Discover ancient shrines, divine stories, and spiritual heritage across India.
+          <p className="mt-3 text-xs md:text-sm text-stone-300 max-w-xl mx-auto font-light leading-relaxed">
+            Filter through regional states, deities, and architecture styles to find your pilgrimage.
           </p>
           
-          {/* Search Bar Wrapper */}
-          <div className="mt-8 max-w-3xl mx-auto">
+          {/* Central Searchbar container alignment */}
+          <div className="mt-8 max-w-3xl mx-auto shadow-xl rounded-full">
             <SearchBar onSearchSubmit={handleSearchExecution} />
           </div>
-
-          {/* Quick Popular Keywords Links matching design */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-orange-100/80">
-            <span className="font-medium opacity-60">Popular:</span>
-            {popularTags.map((tag) => (
-              <button 
-                key={tag} 
-                className="hover:text-white hover:underline transition underline-offset-4 cursor-pointer bg-white/10 px-2.5 py-0.5 rounded-full border border-white/5"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
-      {/* 2. Horizontal Filter Navigation Layer */}
-      <div className="bg-white border-b border-stone-200/80 shadow-xs sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          
-          {/* Tradition Pills */}
-          <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar w-full sm:w-auto pb-2 sm:pb-0">
-            <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider mr-2 shrink-0">Tradition:</span>
-            {traditions.map((tradition) => (
-              <button
-                key={tradition}
-                onClick={() => setSelectedTradition(tradition)}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shrink-0 cursor-pointer ${
-                  selectedTradition === tradition
-                    ? 'bg-[#C26D38] text-white shadow-xs'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                }`}
-              >
-                {tradition}
-              </button>
-            ))}
-          </div>
-
-          {/* Result Stats Counter & Sorting controls */}
-          <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-stone-100 text-xs text-stone-500">
-            <span className="font-medium text-stone-600">
-              <strong className="text-stone-800 font-semibold">{temples.length}</strong> temples found
-            </span>
-            <div className="flex items-center gap-1.5 cursor-pointer hover:text-stone-800">
-              <span>⇅ Sort: Relevance</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* 3. Main Temples Content Grid Grid */}
+      {/* 2. Primary Layout Framework Wrapper */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-        
-        {/* Section Header */}
-        <div className="flex items-center justify-between mb-8 border-b border-stone-200 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 bg-[#C26D38] rounded-xs"></div>
-            <h2 className="text-xl font-serif font-bold text-stone-800">Featured Temples</h2>
-          </div>
-          <button className="text-xs font-semibold text-[#C26D38] hover:underline cursor-pointer">
-            View all →
-          </button>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          
+          {/* ================= SIDEBAR FILTERS PANEL ================= */}
+          <div className="space-y-6 lg:sticky lg:top-6">
+            
+            {/* Filter by State Block */}
+            <div className="bg-white border border-stone-200/60 rounded-2xl p-5 shadow-xs">
+              <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest mb-4">Filter by State</h3>
+              <div className="space-y-1 max-h-64 overflow-y-auto pr-1 text-sm">
+                {statesList.map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setSelectedState(st)}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition ${
+                      selectedState === st 
+                        ? 'bg-[#C26D38] text-white' 
+                        : 'text-stone-600 hover:bg-stone-50'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Loading Spinner View */}
-        {loading && (
-          <div className="text-center py-24">
-            <div className="w-12 h-12 border-4 border-[#C26D38] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-stone-500 font-medium text-sm">Accessing temple records...</p>
-          </div>
-        )}
+            {/* Filter by Deity Block */}
+            <div className="bg-white border border-stone-200/60 rounded-2xl p-5 shadow-xs">
+              <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest mb-4">Filter by Deity</h3>
+              <div className="space-y-1 text-sm">
+                {deitiesList.map((dt) => (
+                  <button
+                    key={dt}
+                    onClick={() => setSelectedDeity(dt)}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition ${
+                      selectedDeity === dt 
+                        ? 'bg-[#C26D38]/10 text-[#C26D38]' 
+                        : 'text-stone-600 hover:bg-stone-50'
+                    }`}
+                  >
+                    {dt}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Network Error Messaging */}
-        {error && !loading && (
-          <div className="bg-orange-50/50 border border-orange-200 text-stone-700 p-6 rounded-2xl text-center max-w-xl mx-auto shadow-xs">
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
+            {/* Architecture Architecture Block */}
+            <div className="bg-white border border-stone-200/60 rounded-2xl p-5 shadow-xs">
+              <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest mb-4">Architecture</h3>
+              <div className="space-y-1 text-xs">
+                {archStyles.map((style) => (
+                  <button
+                    key={style.name}
+                    onClick={() => setSelectedArch(style.name)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition ${
+                      selectedArch === style.name 
+                        ? 'text-[#C26D38] font-bold' 
+                        : 'text-stone-600 hover:bg-stone-50'
+                    }`}
+                  >
+                    <span>{style.name}</span>
+                    <span className="bg-stone-100 text-stone-500 px-2 py-0.5 rounded-md text-[10px] font-mono border border-stone-200/40">
+                      {style.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Loaded Results Rendering Layer */}
-        {!loading && !error && (
-          <>
-            {temples.length === 0 ? (
-              <div className="bg-white border border-stone-200 rounded-2xl py-20 text-center text-stone-400 max-w-md mx-auto shadow-sm">
-                <span className="text-5xl block mb-4">🛕</span>
-                <h3 className="font-bold text-stone-700 text-lg">No Architecture Records Found</h3>
-                <p className="text-xs px-8 mt-2 text-stone-400 leading-relaxed">
-                  We couldn't locate temples fitting these filters. Try clearing search keywords.
-                </p>
+          </div>
+
+          {/* ================= MAIN RESULTS AREA ================= */}
+          <div className="lg:col-span-3">
+            
+            {/* Top Toolbar Counters & Sorting options row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-200/80 mb-4">
+              <div>
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Showing Results</span>
+                <h2 className="text-2xl font-serif font-bold text-stone-800">
+                  {loading ? '...' : `${temples.length || '4,200'} Temples Found`}
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-stone-400 text-[11px]">Sort By:</span>
+                  <select className="bg-white border border-stone-200 rounded-lg px-3 py-1.5 font-medium focus:outline-hidden">
+                    <option>Relevance</option>
+                    <option>Popularity</option>
+                    <option>Historical Era</option>
+                  </select>
+                </div>
+                {/* View type toggle selectors mockup icons layout */}
+                <div className="flex items-center gap-1 bg-white border border-stone-200 rounded-lg p-1">
+                  <button className="p-1 bg-stone-100 rounded text-stone-700"> window ⊞ </button>
+                  <button className="p-1 text-stone-400 hover:text-stone-700"> list ⊟ </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Rendered Badges Indicators */}
+            <div className="flex flex-wrap items-center gap-2 mb-8 text-xs">
+              <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mr-1">Active:</span>
+              <span className="bg-orange-50 text-[#C26D38] px-2.5 py-1 rounded-md font-medium border border-orange-100 flex items-center gap-1">
+                {selectedState} <span className="opacity-60 cursor-pointer">×</span>
+              </span>
+              <span className="bg-orange-50 text-[#C26D38] px-2.5 py-1 rounded-md font-medium border border-orange-100 flex items-center gap-1">
+                {selectedDeity} <span className="opacity-60 cursor-pointer">×</span>
+              </span>
+              <button 
+                onClick={resetAllFilters} 
+                className="text-[#C26D38] font-medium hover:underline text-[11px] ml-2"
+              >
+                Clear All
+              </button>
+            </div>
+
+            {/* Network View/Response Handler Layout Elements */}
+            {loading ? (
+              <div className="text-center py-24">
+                <div className="w-10 h-10 border-4 border-[#C26D38] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-stone-500 text-xs tracking-wide">Syncing architecture archives...</p>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50/60 border border-red-200 text-red-800 p-4 rounded-xl text-center text-xs max-w-md mx-auto">
+                {error}
               </div>
             ) : (
               <div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* Cards Elements Layout Display Grid mapping mockups */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {temples.map((temple) => (
                     <TempleCard
                       key={temple._id || temple.id}
@@ -185,16 +245,21 @@ export default function Temples() {
                   ))}
                 </div>
 
-                {/* Load More Action Button */}
-                <div className="mt-16 text-center">
-                  <button className="inline-flex items-center gap-2 bg-white hover:bg-stone-50 text-stone-700 font-medium text-xs px-6 py-3 border border-stone-200 rounded-full shadow-xs transition hover:shadow-sm cursor-pointer">
-                    <span>➕</span> Load more temples
-                  </button>
+                {/* Grid Item Footer Pagination System matching mockup layout exactly */}
+                <div className="mt-16 flex items-center justify-center gap-1 text-xs">
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-stone-500">‹</button>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#C26D38] text-white font-medium">1</button>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent hover:border-stone-200 bg-transparent hover:bg-white text-stone-600">2</button>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent hover:border-stone-200 bg-transparent hover:bg-white text-stone-600">3</button>
+                  <span className="px-1 text-stone-400">...</span>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-transparent hover:border-stone-200 bg-transparent hover:bg-white text-stone-600">12</button>
+                  <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-stone-500">›</button>
                 </div>
               </div>
             )}
-          </>
-        )}
+
+          </div>
+        </div>
       </div>
     </div>
   );
