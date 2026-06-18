@@ -10,6 +10,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  
+  // Dynamic Admin Auth Profile Tracking
+  const [adminEmail, setAdminEmail] = useState("admin@gmail.com");
 
   // Search & Filter State UI Matches
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,10 +32,16 @@ export default function AdminDashboard() {
   // 3. Security Guard: Verify Admin Token on load & Fetch Initial Records
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
+    const storedEmail = localStorage.getItem("userEmail"); // Backend matrix allocation placeholder
 
     if (!userRole || userRole !== "admin") {
       navigate("/login");
       return;
+    }
+
+    // Agar local storage mein real active admin email hai toh use set karein, nahi toh static standard rakhein
+    if (storedEmail) {
+      setAdminEmail(storedEmail);
     }
 
     fetchAdminPanelData();
@@ -222,6 +231,7 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("userRole");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userEmail");
     navigate("/login");
   };
 
@@ -240,11 +250,12 @@ export default function AdminDashboard() {
           <span className="text-xs bg-[#795548] px-2 py-0.5 rounded text-amber-200 border border-amber-900/20 ml-2">Admin Console</span>
         </div>
         <div className="flex items-center gap-4 text-sm">
+          {/* REAL ADMIN EMAIL DISPATCH METRIC FIELD */}
           <div className="flex items-center gap-1.5 text-amber-100">
             <svg className="w-4 h-4 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-            <span>admin@devsthana.in</span>
+            <span className="font-medium tracking-wide">{adminEmail}</span>
           </div>
           <button 
             onClick={handleLogout}
