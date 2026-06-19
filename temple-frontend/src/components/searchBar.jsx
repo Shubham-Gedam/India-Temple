@@ -1,11 +1,6 @@
 import { useState } from 'react';
 
-export default function SearchBar({ onSearchSubmit }) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedState, setSelectedState] = useState('');
-  const [selectedDeity, setSelectedDeity] = useState(''); 
-
-  const statesList = [
+const statesList = [
     'Uttarakhand',
     'Tamil Nadu',
     'Odisha',
@@ -13,7 +8,12 @@ export default function SearchBar({ onSearchSubmit }) {
     'Maharashtra',
     'Karnataka',
     'Gujarat'
-  ];
+];
+
+export default function SearchBar({ onSearchSubmit }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedDeity, setSelectedDeity] = useState(''); 
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -31,6 +31,7 @@ export default function SearchBar({ onSearchSubmit }) {
       <form 
         onSubmit={handleFormSubmit} 
         className="flex items-center bg-[#fffcf8] border border-[#f5ebe0] rounded-full p-2 pl-5 pr-2 shadow-sm"
+        role="search" // ✅ Semantics: Express explicitly that this form is meant for searching
       >
         {/* Left Section: Search Input with Magnifying Glass Icon */}
         <div className="flex items-center flex-1 gap-3 min-w-0">
@@ -40,6 +41,7 @@ export default function SearchBar({ onSearchSubmit }) {
             stroke="currentColor" 
             strokeWidth="2.5" 
             viewBox="0 0 24 24"
+            aria-hidden="true" // ✅ Screen reader completes decorative element bypass
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
@@ -49,11 +51,12 @@ export default function SearchBar({ onSearchSubmit }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-transparent text-[#5c4d42] placeholder-[#a69688] text-base focus:outline-none py-1 min-w-0"
+            aria-label="Search temples by name, deity, or city text terms" // ✅ FIXES Accessibility Issue
           />
         </div>
 
         {/* Vertical Divider */}
-        <div className="h-6 w-1px bg-[#e6d8cb] mx-3 hidden sm:block"></div>
+        <div className="h-6 w-[1px] bg-[#e6d8cb] mx-3 hidden sm:block" aria-hidden="true"></div>
 
         {/* Middle Section: Location Icon + Dropdown */}
         <div className="flex items-center gap-2 pr-2 hidden sm:flex">
@@ -63,6 +66,7 @@ export default function SearchBar({ onSearchSubmit }) {
             stroke="currentColor" 
             strokeWidth="2" 
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -73,6 +77,7 @@ export default function SearchBar({ onSearchSubmit }) {
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
               className="appearance-none bg-transparent text-[#736254] text-base font-medium pr-7 py-1 focus:outline-none cursor-pointer"
+              aria-label="Filter records by Indian State registry" // ✅ FIXES Accessibility Issue
             >
               <option value="">All States</option>
               {statesList.map((stateItem) => (
@@ -82,7 +87,7 @@ export default function SearchBar({ onSearchSubmit }) {
               ))}
             </select>
             {/* Custom Arrow Icon */}
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-[#736254]">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-[#736254]" aria-hidden="true">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
@@ -92,8 +97,9 @@ export default function SearchBar({ onSearchSubmit }) {
 
         {/* Right Section: Action Submit Button */}
         <button
-          type="submit"
+          type="button"
           className="bg-[#c15c1d] hover:bg-[#a84d15] text-white text-base font-semibold px-7 py-2.5 rounded-full shadow-sm transition-colors duration-200 ml-2"
+          aria-label="Submit regional temple query parameters" // ✅ Explicit accessible context descriptor
         >
           Search
         </button>

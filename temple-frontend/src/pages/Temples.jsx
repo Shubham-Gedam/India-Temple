@@ -3,17 +3,8 @@ import SearchBar from '../components/searchBar';
 import TempleCard from '../components/TempleCart'; 
 import { TEMPLE_API as API } from '../apis/axios';
 
-export default function Temples() {
-  const [temples, setTemples] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  // State management for individual filter layers
-  const [selectedState, setSelectedState] = useState('All States');
-  const [selectedDeity, setSelectedDeity] = useState('All Deities');
-  const [selectedArch, setSelectedArch] = useState('All Types');
 
-  // Hardcoded Sidebar Lists matching DevaBhoomi mockup
+ // Hardcoded Sidebar Lists matching DevaBhoomi mockup
   const statesList = ['All States', 'Tamil Nadu', 'Andhra Pradesh', 'Karnataka', 'Kerala', 'Maharashtra', 'Rajasthan', 'Uttar Pradesh', 'Odisha'];
   const deitiesList = ['All Deities', 'Lord Shiva', 'Lord Vishnu', 'Goddess Devi', 'Lord Ganesha', 'Lord Murugan', 'Lord Brahma'];
   const archStyles = [
@@ -24,6 +15,16 @@ export default function Temples() {
     { name: 'Cave Temple', count: 210 },
     { name: 'Hilltop Shrine', count: 150 },
   ];
+
+export default function Temples() {
+  const [temples, setTemples] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  // State management for individual filter layers
+  const [selectedState, setSelectedState] = useState('All States');
+  const [selectedDeity, setSelectedDeity] = useState('All Deities');
+  const [selectedArch, setSelectedArch] = useState('All Types');
 
   useEffect(() => {
     fetchInitialTemples();

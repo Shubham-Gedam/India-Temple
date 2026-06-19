@@ -268,6 +268,7 @@ export default function AdminDashboard() {
           <button 
             onClick={handleLogout}
             className="flex items-center gap-1 text-xs border border-amber-500/30 hover:bg-white/10 px-3 py-1.5 rounded-md transition-all font-medium"
+            type="button"
           >
             Sign Out
           </button>
@@ -307,6 +308,7 @@ export default function AdminDashboard() {
             <button 
               onClick={() => { clearForm(); window.scrollTo({ top: 400, behavior: "smooth" }); }}
               className="bg-[#D84315] hover:bg-[#BF360C] text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-sm transition-colors"
+              type="button"
             >
               + Add New Temple
             </button>
@@ -316,13 +318,17 @@ export default function AdminDashboard() {
           {successMsg && (
             <div className="bg-[#E8F5E9] text-[#2E7D32] text-sm border border-[#C8E6C9] px-4 py-3 rounded-xl flex justify-between items-center shadow-sm">
               <span className="font-medium">✨ {successMsg}</span>
-              <button onClick={() => setSuccessMsg("")} className="text-emerald-800 text-lg font-bold">×</button>
+              <button onClick={() => setSuccessMsg("")} className="text-emerald-800 text-lg font-bold" type="button">
+                ×
+              </button>
             </div>
           )}
           {error && (
             <div className="bg-[#FFEBEE] text-[#C62828] text-sm border border-[#FFCDD2] px-4 py-3 rounded-xl flex justify-between items-center shadow-sm">
               <span className="font-medium">⚠️ {error}</span>
-              <button onClick={() => setError("")} className="text-red-800 text-lg font-bold">×</button>
+              <button onClick={() => setError("")} className="text-red-800 text-lg font-bold" type="button">
+                ×
+              </button>
             </div>
           )}
 

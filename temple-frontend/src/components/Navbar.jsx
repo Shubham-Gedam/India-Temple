@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Explore Temples', path: '/temples' },
+    { name: 'Pilgrimages', path: '/pilgrimages' },
+    { name: 'Festivals', path: '/festivals' },
+  ];
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -25,13 +32,6 @@ export default function Navbar() {
 
   // Helper function to handle active state border bottom / highlight matching the mockups
   const isActive = (path) => location.pathname === path;
-
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Explore Temples', path: '/temples' },
-    { name: 'Pilgrimages', path: '/pilgrimages' },
-    { name: 'Festivals', path: '/festivals' },
-  ];
 
   return (
     <nav className="bg-[#FAF6F0] sticky top-0 z-50 border-b border-[#EADBC8]/40 shadow-sm font-sans">
@@ -93,7 +93,7 @@ export default function Navbar() {
                   <span className="text-sm font-semibold text-gray-700">{userName}</span>
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-red-600 text-sm font-medium transition-colors pl-2">
+                <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-red-600 text-sm font-medium transition-colors pl-2" type="button">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"></path></svg>
                   Logout
                 </button>
@@ -111,7 +111,7 @@ export default function Navbar() {
                   <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
                   <span className="text-sm font-semibold text-gray-700">Admin</span>
                 </div>
-                <button onClick={handleLogout} className="flex items-center gap-1 bg-[#FFF0F0] border border-red-200 hover:bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <button onClick={handleLogout} className="flex items-center gap-1 bg-[#FFF0F0] border border-red-200 hover:bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors" type="button ">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1"></path></svg>
                   Logout
                 </button>
