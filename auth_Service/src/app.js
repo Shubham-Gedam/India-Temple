@@ -8,7 +8,7 @@ app.use(cookieParser());
 
 // Make sure ye parsing body middlewares ke upar likha ho
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: 'https://india-temple.vercel.app/', 
   credentials: true                
 }));
 
