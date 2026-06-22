@@ -6,7 +6,7 @@ import cors from 'cors';
 const app = express();
 
 app.use(cors({
-  origin: 'https://india-temple.vercel.app/',
+  origin: 'https://india-temple.vercel.app',
   credentials: true
 }));
 
