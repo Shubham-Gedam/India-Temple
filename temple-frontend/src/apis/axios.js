@@ -1,28 +1,35 @@
 import axios from 'axios';
 
-// 1. AUTH SERVICE INSTANCE (Port 3000 + base path '/api/auth')
+// AUTH SERVICE
 export const AUTH_API = axios.create({
-  baseURL: 'http://localhost:3000/api/auth', 
+  baseURL: 'https://india-temple.onrender.com/api/auth',
   withCredentials: true,
 });
 
-// 2. TEMPLE SERVICE INSTANCE (Port 3001 + base path '/api/temples')
+// TEMPLE SERVICE
 export const TEMPLE_API = axios.create({
-  baseURL: 'http://localhost:3001/api/temples', 
+  baseURL: 'https://india-temple-1.onrender.com/api/temples',
   withCredentials: true,
 });
 
-// Request Interceptor: Dono servers par token authorization verify karne ke liye
 const attachToken = (config) => {
   const token = localStorage.getItem('token');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 };
 
-AUTH_API.interceptors.request.use(attachToken, (error) => Promise.reject(error));
-TEMPLE_API.interceptors.request.use(attachToken, (error) => Promise.reject(error));
+AUTH_API.interceptors.request.use(
+  attachToken,
+  (error) => Promise.reject(error)
+);
 
-const API = TEMPLE_API;
-export default API;
+TEMPLE_API.interceptors.request.use(
+  attachToken,
+  (error) => Promise.reject(error)
+);
+
+export default TEMPLE_API;
