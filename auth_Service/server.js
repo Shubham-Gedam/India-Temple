@@ -7,6 +7,8 @@ import ConnectDB from './src/db/db.js';
 
 ConnectDB()
 
+const PORT = process.env.PORT || 3000;
+
 app.listen('3000',()=>{
-    console.log("Auth server is running on 3000");
+    console.log("Auth server is running on ${PORT}");
 })
