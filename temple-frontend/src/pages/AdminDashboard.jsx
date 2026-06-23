@@ -32,9 +32,12 @@ export default function AdminDashboard() {
   const [festivals, setFestivals] = useState("");
   const [visitorGuidelines, setVisitorGuidelines] = useState("");
 
-  // Helper utility to generate headers quickly for secure endpoints
+  // SECURITY UTIL: Runtime pe token read karke dynamically configure karega
   const getAuthConfig = () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token") || localStorage.getItem("userToken");
+    if (!token) {
+      console.warn("Direct Auth Matrix Warning: Token missing entirely from storage chains.");
+    }
     return {
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
@@ -46,8 +49,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
     const storedEmail = localStorage.getItem("userEmail");
+    const token = localStorage.getItem("token") || localStorage.getItem("userToken");
 
-    if (!userRole || userRole !== "admin") {
+    if (!userRole || userRole !== "admin" || !token) {
       navigate("/login");
       return;
     }
@@ -63,7 +67,8 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       setError("");
-      // Secure layout call including local authorization token wrapper
+      
+      // Axios GET requires config as 2nd argument
       const response = await API.get("/", getAuthConfig());
       const data = Array.isArray(response.data)
         ? response.data
@@ -106,14 +111,12 @@ export default function AdminDashboard() {
     setError("");
     setSuccessMsg("");
 
-    // Parsing "City, State" from the combined string field smoothly
     const locationParts = location.split(",");
     const cityClean = locationParts[0] ? locationParts[0].trim() : "";
     const stateClean = locationParts[1] ? locationParts[1].trim() : "";
 
     const finalImageUrl = image.trim() || "https://images.unsplash.com/photo-1600100397608-f010e42fa02e";
 
-    // EXACT POSTMAN STRUCTURAL MATCH
     const payload = {
       name: name.trim(),
       location: {
@@ -164,19 +167,17 @@ export default function AdminDashboard() {
 
     try {
       if (editingId) {
-        // --- FIXED LAYER: Backend update controller expects slug param ---
         const currentSelectedTemple = temples.find(t => (t._id || t.id) === editingId);
-        
         const requestParamSlug = currentSelectedTemple?.slug || 
                                  name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
 
-        console.log(`Submitting PUT Update Request directly onto parameters slug target: /${requestParamSlug}`);
+        console.log(`Submitting PUT Update Request: /${requestParamSlug}`);
         
-        // Passing direct configuration object as the third argument in explicit PUT layout context
+        // Axios PUT dynamic params: config goes into 3rd position (url, data, config)
         await API.put(`/${requestParamSlug}`, payload, getAuthConfig());
         setSuccessMsg(`${name.trim()} record updated successfully.`);
       } else {
-        // Passing auth configuration stack as the third argument parameters layer
+        // Axios POST dynamic params: config goes into 3rd position (url, data, config)
         await API.post("/", payload, getAuthConfig());
         setSuccessMsg("New heritage temple cataloged successfully!");
       }
@@ -192,7 +193,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // 6. Setup Edit Mode triggers (Re-populating the complete layout object safely)
+  // 6. Setup Edit Mode triggers
   const handleEditTrigger = (temple) => {
     console.log("Full Temple Object Selected for Edit:", temple);
 
@@ -231,7 +232,7 @@ export default function AdminDashboard() {
   const handleDeleteAction = async (id) => {
     if (!window.confirm("Are you absolutely sure you want to drop this database log entry permanently?")) return;
     try {
-      // Adding explicit header config metadata blueprint tracking
+      // Axios DELETE configuration stack goes into 2nd position
       await API.delete(`/${id}`, getAuthConfig());
       setSuccessMsg("Record dropped safely.");
       fetchAdminPanelData();
@@ -243,6 +244,7 @@ export default function AdminDashboard() {
   // 8. Admin Sign Out Operation
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userToken");
     localStorage.removeItem("userRole");
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
@@ -253,7 +255,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#FDFBF7] text-[#3E2723] font-sans flex flex-col antialiased">
       
       {/* TOP HEADER BRANDING LAYER */}
-      {/* <header className="bg-[#5D4037] text-white px-6 py-3 flex justify-between items-center shadow-md z-10">
+      <header className="bg-[#5D4037] text-white px-6 py-3 flex justify-between items-center shadow-md z-10">
         <div className="flex items-center gap-2">
           <div className="bg-[#FF9800] p-1.5 rounded-lg text-[#5D4037]">
             <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
@@ -278,13 +280,13 @@ export default function AdminDashboard() {
             Sign Out
           </button>
         </div>
-      </header> */}
+      </header>
 
       {/* CORE WRAPPER CONTAINER */}
       <div className="flex flex-1 relative">
         
         {/* LEFT SIDEBAR NAVIGATION */}
-        {/* <aside className="w-64 bg-white border-r border-[#EFEBE9] p-4 flex flex-col justify-between hidden md:flex shrink-0">
+        <aside className="w-64 bg-white border-r border-[#EFEBE9] p-4 flex flex-col justify-between hidden md:flex shrink-0">
           <div className="space-y-1">
             <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#FFF3E0] text-[#E65100] font-semibold text-sm transition-all text-left">
               📋 Overview
@@ -300,7 +302,7 @@ export default function AdminDashboard() {
               All systems operational
             </div>
           </div>
-        </aside> */}
+        </aside>
 
         {/* MAIN BODY SCROLL PANEL */}
         <main className="flex-1 p-6 md:p-8 space-y-6 overflow-y-auto max-w-7xl mx-auto w-full">
