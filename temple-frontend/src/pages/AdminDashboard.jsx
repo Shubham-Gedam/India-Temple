@@ -32,6 +32,16 @@ export default function AdminDashboard() {
   const [festivals, setFestivals] = useState("");
   const [visitorGuidelines, setVisitorGuidelines] = useState("");
 
+  // Helper utility to generate headers quickly for secure endpoints
+  const getAuthConfig = () => {
+    const token = localStorage.getItem("token");
+    return {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    };
+  };
+
   // 3. Security Guard: Verify Admin Token on load & Fetch Initial Records
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
@@ -53,7 +63,8 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       setError("");
-      const response = await API.get("/");
+      // Secure layout call including local authorization token wrapper
+      const response = await API.get("/", getAuthConfig());
       const data = Array.isArray(response.data)
         ? response.data
         : response.data.temples || [];
@@ -65,11 +76,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  // Compute stats metrics counts
-  const totalCount = temples.length;
-  const verifiedCount = temples.filter(t => t.isVerified !== false).length;
-  const pendingCount = temples.filter(t => t.isVerified === false).length;
 
   // Filter temples based on UI selectors
   const filteredTemples = temples.filter(temple => {
@@ -161,17 +167,17 @@ export default function AdminDashboard() {
         // --- FIXED LAYER: Backend update controller expects slug param ---
         const currentSelectedTemple = temples.find(t => (t._id || t.id) === editingId);
         
-        // Agar backend ke paas current item ka valid slug property hai toh use kijiye, 
-        // nahi toh safety ke liye auto fallback slug setup create kijiye.
         const requestParamSlug = currentSelectedTemple?.slug || 
                                  name.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
 
         console.log(`Submitting PUT Update Request directly onto parameters slug target: /${requestParamSlug}`);
         
-        await API.put(`/${requestParamSlug}`, payload);
+        // Passing direct configuration object as the third argument in explicit PUT layout context
+        await API.put(`/${requestParamSlug}`, payload, getAuthConfig());
         setSuccessMsg(`${name.trim()} record updated successfully.`);
       } else {
-        await API.post("/", payload);
+        // Passing auth configuration stack as the third argument parameters layer
+        await API.post("/", payload, getAuthConfig());
         setSuccessMsg("New heritage temple cataloged successfully!");
       }
       clearForm();
@@ -190,10 +196,7 @@ export default function AdminDashboard() {
   const handleEditTrigger = (temple) => {
     console.log("Full Temple Object Selected for Edit:", temple);
 
-    // FIX: editingId ko backend matching id track karne dijiye
     setEditingId(temple._id || temple.id);
-
-    // --- Baaki ka data binding layout layers ---
     setName(temple.name || "");
 
     if (temple.location && typeof temple.location === 'object') {
@@ -228,7 +231,8 @@ export default function AdminDashboard() {
   const handleDeleteAction = async (id) => {
     if (!window.confirm("Are you absolutely sure you want to drop this database log entry permanently?")) return;
     try {
-      await API.delete(`/${id}`);
+      // Adding explicit header config metadata blueprint tracking
+      await API.delete(`/${id}`, getAuthConfig());
       setSuccessMsg("Record dropped safely.");
       fetchAdminPanelData();
     } catch (err) {
@@ -238,6 +242,7 @@ export default function AdminDashboard() {
 
   // 8. Admin Sign Out Operation
   const handleLogout = () => {
+    localStorage.removeItem("token");
     localStorage.removeItem("userRole");
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
@@ -314,7 +319,7 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {/* DYNAMIC ALERT LOG BANNER NOTIFICATIONS */}
+          {/* DYNAMIC ALERT BANNER NOTIFICATIONS */}
           {successMsg && (
             <div className="bg-[#E8F5E9] text-[#2E7D32] text-sm border border-[#C8E6C9] px-4 py-3 rounded-xl flex justify-between items-center shadow-sm">
               <span className="font-medium">✨ {successMsg}</span>

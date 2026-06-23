@@ -38,6 +38,7 @@ export async function registerController(req,res) {
     res.cookie("token",token,{
         httpOnly: true,
         secure:true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 100,
     })
 
@@ -85,6 +86,7 @@ export async function loginController(req,res) {
     res.cookie("token",token,{
         httpOnly: true,
         secure:true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 100,
     })
 
@@ -130,6 +132,7 @@ export async function logoutController(req,res) {
 
     res.clearCookie("token",{
         httpOnly: true,
+        sameSite: "none",
         secure: true
     })
 
