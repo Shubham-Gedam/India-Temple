@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TEMPLE_API as API } from "../apis/axios";
 
+// Helper function to extract a cookie value by name
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
@@ -32,9 +40,9 @@ export default function AdminDashboard() {
   const [festivals, setFestivals] = useState("");
   const [visitorGuidelines, setVisitorGuidelines] = useState("");
 
-  // FIX 1: Token verification safety fallback for Production 
+  // FIX 1: Read Token from Cookies instead of LocalStorage
   const getAuthConfig = () => {
-    const token = localStorage.getItem("token") || localStorage.getItem("userToken");
+    const token = getCookie("token");
     return {
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
@@ -42,13 +50,14 @@ export default function AdminDashboard() {
     };
   };
 
-  // FIX 2: Added token check in useEffect guard to prevent flash-renders
+  // FIX 2: Corrected Guard logic using Cookie token check
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
+    const token = getCookie("token");
+    const userRole = localStorage.getItem("userRole") || "admin"; // Fallback to admin if backend manages role via JWT cookie
     const storedEmail = localStorage.getItem("userEmail");
-    const token = localStorage.getItem("token") || localStorage.getItem("userToken");
 
-    if (!userRole || userRole !== "admin" || !token) {
+    // Agar cookie me token nahi mila, toh hi kick out karega
+    if (!token) {
       navigate("/login");
       return;
     }
@@ -171,11 +180,9 @@ export default function AdminDashboard() {
 
         console.log(`Submitting PUT Update Request: /${requestParamSlug}`);
         
-        // Config goes to 3rd position in PUT request (url, data, config)
         await API.put(`/${requestParamSlug}`, payload, getAuthConfig());
         setSuccessMsg(`${name.trim()} record updated successfully.`);
       } else {
-        // Config goes to 3rd position in POST request (url, data, config)
         await API.post("/", payload, getAuthConfig());
         setSuccessMsg("New heritage temple cataloged successfully!");
       }
@@ -230,7 +237,6 @@ export default function AdminDashboard() {
   const handleDeleteAction = async (id) => {
     if (!window.confirm("Are you absolutely sure you want to drop this database log entry permanently?")) return;
     try {
-      // Config goes to 2nd position in DELETE request (url, config)
       await API.delete(`/${id}`, getAuthConfig());
       setSuccessMsg("Record dropped safely.");
       fetchAdminPanelData();
@@ -239,20 +245,24 @@ export default function AdminDashboard() {
     }
   };
 
-  // 8. Admin Sign Out Operation
+  // FIX 4: Correct logout handling for clearing cookie token
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userToken"); // Clears custom fallback keys
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userEmail");
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    localStorage.clear();
     navigate("/login");
   };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#3E2723] font-sans flex flex-col antialiased">
+      {/* Optional Top bar for logout testing */}
+      <header className="bg-white border-b border-[#EFEBE9] p-4 flex justify-between items-center max-w-7xl w-full mx-auto">
+        <span className="font-bold text-sm">Logged in as: {adminEmail}</span>
+        <button onClick={handleLogout} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-red-100 transition-colors">
+          🚪 Logout
+        </button>
+      </header>
+
       <main className="flex-1 p-6 md:p-8 space-y-6 overflow-y-auto max-w-7xl mx-auto w-full">
-        
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#3E2723] tracking-tight">Admin Master Console</h1>
@@ -286,7 +296,7 @@ export default function AdminDashboard() {
           <div className="lg:col-span-5 bg-[#FAF7F2] border border-[#E8E2D6] p-6 rounded-2xl shadow-sm">
             <h2 className="text-lg font-bold text-[#3E2723] mb-4 pb-2 border-b border-[#E8E2D6]">
               {editingId ? "📝 Edit Temple Profile" : "➕ Add Heritage Entry"}
-            </h2>
+            </h2> 
 
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
