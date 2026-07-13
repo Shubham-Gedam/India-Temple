@@ -251,56 +251,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#3E2723] font-sans flex flex-col antialiased">
-      
-      {/* TOP HEADER BRANDING LAYER */}
-      {/* <header className="bg-[#5D4037] text-white px-6 py-3 flex justify-between items-center shadow-md z-10">
-        <div className="flex items-center gap-2">
-          <div className="bg-[#FF9800] p-1.5 rounded-lg text-[#5D4037]">
-            <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-              <path d="M12 2L2 22h20L12 2zm0 4.31L18.85 20H5.15L12 6.31zM11 16h2v2h-2v-2zm0-6h2v4h-2v-4z"/>
-            </svg>
-          </div>
-          <span className="text-xl font-bold tracking-wide">DevSthana</span>
-          <span className="text-xs bg-[#795548] px-2 py-0.5 rounded text-amber-200 border border-amber-900/20 ml-2">Admin Console</span>
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1.5 text-amber-100">
-            <svg className="w-4 h-4 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            <span className="font-medium tracking-wide">{adminEmail}</span>
-          </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-1 text-xs border border-amber-500/30 hover:bg-white/10 px-3 py-1.5 rounded-md transition-all font-medium"
-            type="button"
-          >
-            Sign Out
-          </button>
-        </div>
-      </header> */}
 
       {/* CORE WRAPPER CONTAINER */}
       <div className="flex flex-1 relative">
-        
-        {/* LEFT SIDEBAR NAVIGATION */}
-        {/* <aside className="w-64 bg-white border-r border-[#EFEBE9] p-4 flex flex-col justify-between hidden md:flex shrink-0">
-          <div className="space-y-1">
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#FFF3E0] text-[#E65100] font-semibold text-sm transition-all text-left">
-              📋 Overview
-            </button>
-            <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[#795548] hover:bg-[#F5F5F5] font-medium text-sm transition-all text-left">
-              ☥ Temples
-            </button>
-          </div>
-          <div className="bg-[#EFEBE9]/60 p-3 rounded-xl border border-[#E0D4D0]">
-            <div className="text-xs text-[#795548] font-semibold mb-1">Database Status</div>
-            <div className="flex items-center gap-2 text-xs text-[#2E7D32] font-medium">
-              <span className="w-2 h-2 rounded-full bg-[#4CAF50] animate-pulse"></span>
-              All systems operational
-            </div>
-          </div>
-        </aside> */}
 
         {/* MAIN BODY SCROLL PANEL */}
         <main className="flex-1 p-6 md:p-8 space-y-6 overflow-y-auto max-w-7xl mx-auto w-full">
@@ -344,12 +297,14 @@ export default function AdminDashboard() {
             <div className="lg:col-span-5 bg-[#FAF7F2] border border-[#E8E2D6] p-6 rounded-2xl shadow-sm">
               <h2 className="text-lg font-bold text-[#3E2723] mb-4 pb-2 border-b border-[#E8E2D6]">
                 {editingId ? "📝 Edit Temple Profile" : "➕ Add Heritage Entry"}
-              </h2>
+              </h2> 
 
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Temple Name *</label>
+                  <label htmlFor="adminTempleName" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Temple Name *</label>
                   <input
+                    id="adminTempleName"
+                    name="adminTempleName"
                     type="text" required value={name} onChange={(e) => setName(e.target.value)}
                     className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                     placeholder="e.g., Meenakshi Temple"
@@ -357,8 +312,10 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Location * (City, State)</label>
+                  <label htmlFor="adminLocation" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Location * (City, State)</label>
                   <input
+                    id="adminLocation"
+                    name="adminLocation"
                     type="text" required value={location} onChange={(e) => setLocation(e.target.value)}
                     className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                     placeholder="e.g., Madurai, Tamil Nadu"
@@ -367,16 +324,20 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Presiding Deity *</label>
+                    <label htmlFor="adminDeity" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Presiding Deity *</label>
                     <input
+                      id="adminDeity"
+                      name="adminDeity"
                       type="text" required value={deity} onChange={(e) => setDeity(e.target.value)}
                       className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                       placeholder="e.g., Durga"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Architecture Style</label>
+                    <label htmlFor="adminArchitecture" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Architecture Style</label>
                     <input
+                      id="adminArchitecture"
+                      name="adminArchitecture"
                       type="text" value={architecture} onChange={(e) => setArchitecture(e.target.value)}
                       className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                       placeholder="e.g., Dravidian style"
@@ -385,8 +346,10 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Significance / Description</label>
+                  <label htmlFor="adminSignificance" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Significance / Description</label>
                   <input
+                    id="adminSignificance"
+                    name="adminSignificance"
                     type="text" value={significance} onChange={(e) => setSignificance(e.target.value)}
                     className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                     placeholder="e.g., One of the 51 Shakti Peethas"
@@ -394,8 +357,10 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Image URL</label>
+                  <label htmlFor="adminImage" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Image URL</label>
                   <input
+                    id="adminImage"
+                    name="adminImage"
                     type="text" value={image} onChange={(e) => setImage(e.target.value)}
                     className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                     placeholder="https://example.com/meenakshi.jpg"
@@ -403,8 +368,10 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Historical Background *</label>
+                  <label htmlFor="adminHistory" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Historical Background *</label>
                   <textarea
+                    id="adminHistory"
+                    name="adminHistory"
                     rows="3" required value={history} onChange={(e) => setHistory(e.target.value)}
                     className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                     placeholder="Detailed timeline metrics or background context..."
@@ -413,16 +380,20 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Darshan Timings</label>
+                    <label htmlFor="adminTimings" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Darshan Timings</label>
                     <input
+                      id="adminTimings"
+                      name="adminTimings"
                       type="text" value={darshanTimings} onChange={(e) => setDarshanTimings(e.target.value)}
                       className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                       placeholder="e.g., 5:00 AM"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Main Festival Name</label>
+                    <label htmlFor="adminFestivals" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Main Festival Name</label>
                     <input
+                      id="adminFestivals"
+                      name="adminFestivals"
                       type="text" value={festivals} onChange={(e) => setFestivals(e.target.value)}
                       className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                       placeholder="e.g., Meenakshi Thirukalyanam"
@@ -431,8 +402,10 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Visitor Dress Code</label>
+                  <label htmlFor="adminDressCode" className="block text-xs font-bold text-[#795548] uppercase tracking-wider mb-1">Visitor Dress Code</label>
                   <input
+                    id="adminDressCode"
+                    name="adminDressCode"
                     type="text" value={visitorGuidelines} onChange={(e) => setVisitorGuidelines(e.target.value)}
                     className="w-full bg-white border border-[#D7CCC8] rounded-xl p-2.5 text-sm focus:outline-none focus:border-[#D84315]"
                     placeholder="e.g., Traditional attire required"
@@ -459,11 +432,15 @@ export default function AdminDashboard() {
                   <h2 className="text-base font-bold text-[#3E2723]">Temple Catalog</h2>
                   <span className="bg-[#FFE0B2] text-[#E65100] text-xs font-bold px-2 py-0.5 rounded-full">{filteredTemples.length} entries</span>
                 </div>
-                <input
-                  type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search temples..."
-                  className="w-full sm:w-48 bg-white border border-[#D7CCC8] rounded-xl py-1.5 px-3 text-xs focus:outline-none focus:border-[#D84315]"
-                />
+                <div>
+                  <label htmlFor="adminSearchField" className="sr-only">Search temples catalog list</label>
+                  <input
+                    id="adminSearchField"
+                    type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search temples..."
+                    className="w-full sm:w-48 bg-white border border-[#D7CCC8] rounded-xl py-1.5 px-3 text-xs focus:outline-none focus:border-[#D84315]"
+                  />
+                </div>
               </div>
 
               {loading ? (
