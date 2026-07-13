@@ -30,54 +30,65 @@ export default function Login() {
 
   // Form Submission Event Handler
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  setLoading(true);
 
-    try {
-      if (isRegister) {
-        const payload = {
-          username,
-          email,
-          password,
-          fullname: { firstname, lastname }
-        };
+  try {
+    if (isRegister) {
+      const payload = {
+        username,
+        email,
+        password,
+        fullname: { firstname, lastname }
+      };
 
-        await API.post('/register', payload);
-        setSuccess('Registration successful! Please switch over to Sign In.');
-        setIsRegister(false);
-        setFirstname('');
-        setLastname('');
-      } else {
-  const response = await API.post('/login', { email, password });
-  const userData = response.data?.user;
-  
-  // 🔥 FALLBACK FIX FOR PRODUCTION:
-  // Agar backend object ya response metadata me token bhej raha hai, toh use save karein
-  const token = response.data?.token || response.data?.data?.token;
-  if (token) {
-    localStorage.setItem('token', token);
-  }
-  
-  if (userData) {
-    localStorage.setItem('userRole', userData.role);
-    localStorage.setItem('userName', userData.username);
+      const response = await API.post('/register', payload);
+      
+      // OPTIONAL FALLBACK FOR REGISTER (Agar seedhe register pe token save rakhna ho)
+      const token = response.data?.token;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
 
-    if (userData.role === 'admin') {
-      navigate('/admin');
+      setSuccess('Registration successful! Please switch over to Sign In.');
+      setIsRegister(false);
+      
+      // Clear form states completely
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setFirstname('');
+      setLastname('');
     } else {
-      navigate('/');
+      const response = await API.post('/login', { email, password });
+      const userData = response.data?.user;  
+      
+      // Token extract aur localstorage me save
+      const token = response.data?.token || response.data?.data?.token;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      
+      if (userData) {
+        localStorage.setItem('userRole', userData.role);
+        localStorage.setItem('userName', userData.username);
+
+        if (userData.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      }
     }
+  } catch (err) {
+    console.error(err);
+    setError(err.response?.data?.message || 'Authentication layers failed. Please check credentials.');
+  } finally {
+    setLoading(false);
   }
-}
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Authentication layers failed. Please check credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
+};
 
   // Quick action function to trigger admin routing flows seamlessly 
   const handleAdminBypass = () => {
