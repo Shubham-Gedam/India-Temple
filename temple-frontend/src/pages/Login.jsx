@@ -62,26 +62,36 @@ export default function Login() {
       setFirstname('');
       setLastname('');
     } else {
-      const response = await API.post('/login', { email, password });
-      const userData = response.data?.user;  
-      
-      // Token extract aur localstorage me save
-      const token = response.data?.token || response.data?.data?.token;
-      if (token) {
-        localStorage.setItem('token', token);
-      }
-      
-      if (userData) {
-        localStorage.setItem('userRole', userData.role);
-        localStorage.setItem('userName', userData.username);
+  const response = await API.post('/login', { email, password });
+  
+  // 🔍 DEBUGGING: Pehle console me check karo backend de kya raha hai exact
+  console.log("Full Backend Response Object:", response.data);
 
-        if (userData.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-      }
+  // 🔥 TOKEN SCRAPER matrix: Har possible raste se token nikalne ki koshish karenge
+  const token = 
+    response.data?.token || 
+    response.data?.data?.token || 
+    response.data?.user?.token; // Kuch backend user object ke andar token daal dete hain
+
+  if (token) {
+    localStorage.setItem('token', token);
+    console.log("✅ Token successfully locked into LocalStorage!");
+  } else {
+    console.error("❌ Token nahi mila! Backend response ka structure check karo console me.");
+  }
+
+  const userData = response.data?.user;  
+  if (userData) {
+    localStorage.setItem('userRole', userData.role);
+    localStorage.setItem('userName', userData.username);
+
+    if (userData.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
     }
+  }
+}
   } catch (err) {
     console.error(err);
     setError(err.response?.data?.message || 'Authentication layers failed. Please check credentials.');
