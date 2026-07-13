@@ -50,20 +50,27 @@ export default function Login() {
         setFirstname('');
         setLastname('');
       } else {
-        const response = await API.post('/login', { email, password });
-        const userData = response.data?.user;
-        
-        if (userData) {
-          localStorage.setItem('userRole', userData.role);
-          localStorage.setItem('userName', userData.username);
+  const response = await API.post('/login', { email, password });
+  const userData = response.data?.user;
+  
+  // 🔥 FALLBACK FIX FOR PRODUCTION:
+  // Agar backend object ya response metadata me token bhej raha hai, toh use save karein
+  const token = response.data?.token || response.data?.data?.token;
+  if (token) {
+    localStorage.setItem('token', token);
+  }
+  
+  if (userData) {
+    localStorage.setItem('userRole', userData.role);
+    localStorage.setItem('userName', userData.username);
 
-          if (userData.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/');
-          }
-        }
-      }
+    if (userData.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
+  }
+}
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Authentication layers failed. Please check credentials.');
