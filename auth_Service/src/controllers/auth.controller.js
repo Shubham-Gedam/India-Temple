@@ -44,6 +44,7 @@ export async function registerController(req,res) {
 
     res.status(201).json({
         message:"User registered successfully",
+        token: token,
         user:{
             id: user._id,
             username: user.username,
@@ -90,16 +91,17 @@ export async function loginController(req,res) {
         maxAge: 24 * 60 * 60 * 100,
     })
 
-    res.status(201).json({
-        message:"User logged in successfully",
-        user:{
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            fullname: user.fullname,
-            role: user.role,
-        }
-    })
+    res.status(200).json({
+    message: "User logged in successfully",
+    token: token, 
+    user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        fullname: user.fullname,
+        role: user.role,
+    }
+});
 }
 
 export async function makeAdminController(req,res){

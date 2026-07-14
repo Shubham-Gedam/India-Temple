@@ -84,6 +84,7 @@ export default function Login() {
   if (userData) {
     localStorage.setItem('userRole', userData.role);
     localStorage.setItem('userName', userData.username);
+    localStorage.setItem("userEmail", userData.email);
 
     if (userData.role === 'admin') {
       navigate('/admin');
