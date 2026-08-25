@@ -1,10 +1,7 @@
 import { Link } from 'react-router-dom';
 
-// Prop destructuring me hum id aur image dono backup variables ko add kar rahe hain
 export default function TempleCard({ id, _id, name, location, deity, images, image, slug }) {
   
-  // 1. 🌟 DYNAMIC IMAGE FALLBACK MATRIX
-  // Agar pure string dynamic variable 'image' ho ya nested schema matrix 'images' array ho, dono ko automatic pull karega
   let displayImage = 'https://images.unsplash.com/photo-1600100397608-f010e42fa02e?auto=format&fit=crop&w=600&q=80';
 
   if (Array.isArray(images) && images.length > 0 && images[0]?.url) {
@@ -15,8 +12,7 @@ export default function TempleCard({ id, _id, name, location, deity, images, ima
     displayImage = images;
   }
 
-  // 2. 📍 SAFE LOCATION STRING AND OBJECT INTERPOLATION
-  // Agar location backend se pure object standard me aaya hai ya parent ne string pass ki hai, safe handle hoga
+  //  SAFE LOCATION STRING AND OBJECT INTERPOLATION
   let displayCity = 'Unknown City';
   let displayState = 'Unknown State';
 
@@ -31,8 +27,7 @@ export default function TempleCard({ id, _id, name, location, deity, images, ima
     displayCity = location;
   }
 
-  // 3. 🔗 SECURE LOG NAVIGATION ROUTE IDENTIFIER
-  // Agar routing system slug mangta hai toh priority slug ko, warna MongoDB ObjectId (_id/id) ko backup milega
+  //  SECURE LOG NAVIGATION ROUTE IDENTIFIER
   const activeRouteParam = slug || _id || id;
 
   return (
@@ -47,7 +42,6 @@ export default function TempleCard({ id, _id, name, location, deity, images, ima
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
             onError={(e) => {
-              // Network stream failure handle karne ke liye absolute image placeholder logic
               e.target.src = 'https://images.unsplash.com/photo-1600100397608-f010e42fa02e?auto=format&fit=crop&w=600&q=80';
             }}
           />

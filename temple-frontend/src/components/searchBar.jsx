@@ -31,7 +31,7 @@ export default function SearchBar({ onSearchSubmit }) {
       <form 
         onSubmit={handleFormSubmit} 
         className="flex items-center bg-[#fffcf8] border border-[#f5ebe0] rounded-full p-2 pl-5 pr-2 shadow-sm"
-        role="search" // ✅ Semantics: Express explicitly that this form is meant for searching
+        role="search" 
       >
         {/* Left Section: Search Input with Magnifying Glass Icon */}
         <div className="flex items-center flex-1 gap-3 min-w-0">

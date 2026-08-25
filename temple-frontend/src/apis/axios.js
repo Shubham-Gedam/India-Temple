@@ -4,7 +4,7 @@ import axios from 'axios';
 export const AUTH_API = axios.create({
   baseURL:
     import.meta.env.MODE === "production"
-      ? "https://india-temple.onrender.com/api/auth"
+      ? "https://temple-service-o88r.onrender.com/api/auth"
       : "http://localhost:3000/api/auth",
   withCredentials: true,
 });
@@ -13,7 +13,7 @@ export const AUTH_API = axios.create({
 export const TEMPLE_API = axios.create({
   baseURL:
     import.meta.env.MODE === "production"
-      ? "https://india-temple-1.onrender.com/api/temples"
+      ? "https://india-temple-1-1t6r.onrender.com/api/temples"
       : "http://localhost:3001/api/temples",
   withCredentials: true,
 });

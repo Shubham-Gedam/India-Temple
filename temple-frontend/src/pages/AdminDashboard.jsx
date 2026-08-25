@@ -164,7 +164,6 @@ export default function AdminDashboard() {
 
     try {
       if (editingId) {
-        // --- FIXED LAYER: Backend update controller expects slug param ---
         const currentSelectedTemple = temples.find(t => (t._id || t.id) === editingId);
         
         const requestParamSlug = currentSelectedTemple?.slug || 
